@@ -7,20 +7,21 @@
  * TXD = RXD (pino 2) e RXD = TXD (pino 3) e GND = GND...o ATMEGA328P alimentado.
  */
 
+#define F_CPU 16000000UL
 #include <stdio.h>
 #include <string.h>
 #include <avr/io.h>
-#define F_CPU 16000000UL
 #include <util/delay.h>
 
 //==============================================================================
 // ADVANCED SETTINGS
 #define HOST            "192.168.1.105" // IP FOR CONNECTION
 #define PORT            "1234"          // PORT FOR CONNECTION
-#define SSID            "JG"            // NETWORK SSID
-#define PASSWORD        "cabritinhos"   // NETWORK PASSWORD
+#define SSID            "Marques"       // NETWORK SSID
+#define PASSWORD        "M12345678"     // NETWORK PASSWORD
 #define MAX_DATA        5               // MAX NUMBER OF 'UPLOAD'
 #define MAX_TRY         3               // MAX NUMBER OF FAILS CONNECTIONS
+
 
 //==============================================================================
 //	Function: getByte
@@ -87,35 +88,11 @@ void wait_sec(int n)
     }
 }
 
-//==============================================================================
-//	Function: pinb13_toggle
-//	Description: toggles pinb to show by LED (pinb5 = arduino board pin 13)
-//	system state visual advice
-//==============================================================================
-void pinb13_toggle()
-{
-	PORTB ^= (1 << PB5);
-}
-
-void pinb13_up()
-{
-	PORTB |= (1 << PB5);
-}
-
-void pinb13_down()
-{
-	PORTB &= ~(1 << PB5);
-}
-
-
 int main(void)
 {
-    int ConnectionPort, DataLength;
+    char ConnectionPort, DataLength;
     char DataToSend[40];
     char DataReceived[50];
-	char ConnectToAp[60];
-	char staIpAddr[]  = "192.168.0.108";
-	char requireStr[] = "GET /send\r\n";
 
     //==============================================================================
     // CONFIG SERIAL PORT
@@ -135,102 +112,97 @@ int main(void)
 						 //Seleciona um bit de stop (USBS0 = 0), seleciona 8 bits de dados (UCSZ1/0 = 11) e
 						 //sem polaridade (UCPOL0 = 0 - modo assíncrono).
 
-	DDRB  = (1<<DDB5);	// habilita o pinb (output)
-
     //==============================================================================
     // ESP RESET
     writeString("AT+RST\r\n");
     wait_sec(3);
 
     //==============================================================================
-    // ESP MODE: station mode
-    writeString("AT+CWMODE=1\r\n");
-	pinb13_down();
+    // ESP MODE: softAP + station mode
+    writeString("AT+CWMODE_CUR=3\r\n");
     do{
         readString(DataReceived);
     }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-	pinb13_up();
 
     //==============================================================================
     // ESP MODE: softAP + station mode
     // CONNECT TO A NETWORK
-	sprintf(ConnectToAp, "AT+CWJAP=\"%s\",\"%s\"\r\n", SSID, PASSWORD);
+    writeString("AT+CWJAP_CUR=\"Brega Familiar\",\"boapergunta\"\r\n");
+    do{
+        readString(DataReceived);
+    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 
-	writeString(ConnectToAp);
-	wait_sec(7);
-	// pinb13_down();
-    // do{
-    //     readString(DataReceived);
-    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-	// pinb13_up();
+    // CREATE A NETWORK
+    writeString("AT+CWSAP_CUR=\"ESP8266\",\"1234567890\",5,3\r\n");
+    do{
+        readString(DataReceived);
+    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 
-	//==============================================================================
+
+
+    //==============================================================================
     // GET IP
-    // writeString("AT+CIFSR\r\n");
-	// pinb13_down();
-    // do{
-    //     readString(DataReceived);
-    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-	// pinb13_up();
+    writeString("AT+CIFSR\r\n");
+    do{
+        readString(DataReceived);
+    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 
     //==============================================================================
     // ENABLE MUTIPLE CONNECTIONS
-	writeString("AT+CIPMUX=1\r\n");
-	pinb13_down();
+    writeString("AT+CIPMUX=1\r\n");
     do{
         readString(DataReceived);
     }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-	pinb13_up();
 
-    ConnectionPort = 8080;
-    // DataLength = 2;
-
-	// OPEN TCP CONNETION WITH THE STATION
-	// OK
-	sprintf(DataToSend, "AT+CIPSTART=1,\"TCP\",\"%s\",\"%d\"\r\n", staIpAddr, ConnectionPort);
-	writeString(DataToSend);
-	pinb13_down();
-	_delay_ms(7000);
-	// do{
-	// 	readString(DataReceived);
-	// }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-	pinb13_up();
-
-    // SEND THE DATA
-    // OK
-    sprintf(DataToSend, "AT+CIPSEND=1,%d\r\n", strlen(requireStr) + 2);
-    writeString(DataToSend);
-	pinb13_down();
-	_delay_ms(5000);
-    // do{
-    //     readString(DataReceived);
-    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-	pinb13_up();
-
-    // WRITE THE DATA IN THE CREATED SOCKET
-    // SEND OK
-    sprintf(DataToSend, "%s\r\n", requireStr);
-    writeString(DataToSend);
-	pinb13_down();
+    //==============================================================================
+    // SET THE SERVER TIMEOUT
+    /*writeString("AT+CIPSTO=10\r\n");
     do{
         readString(DataReceived);
-    }while(DataReceived[0] != 'S' && DataReceived[1] != 'E');
-	pinb13_up();
+    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K'); */
 
-    // CLOSE THE SOCKET
-    // OK
-    sprintf(DataToSend, "AT+CIPCLOSE=1\r\n");
-    writeString(DataToSend);
-	pinb13_down();
+    //==============================================================================
+    // ENABLE WEB SERVER
+    writeString("AT+CIPSERVER=1\r\n");
     do{
         readString(DataReceived);
-        if(DataReceived[0] == 'E' && DataReceived[1] == 'R')
-        {
-            break;
-        }
     }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-	pinb13_up();
-        // }
 
-    // }
+
+    //==============================================================================
+    // SYSTEM LOOP
+    while(1)
+    {
+        ConnectionPort = 0;
+        DataLength = 2;
+        writeString("AT+CIPSTART=\"TCP\",\"192.168.4.1\",8080 \r\n");
+        do{
+            readString(DataReceived);
+        }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+        //readString(DataReceived);
+
+        // SEND BACK THE DATA
+        // OK
+        sprintf(DataToSend, "AT+CIPSEND=%c,%d\r\n", 0, 15);
+        writeString(DataToSend);
+        do{
+            readString(DataReceived);
+        }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+
+        // WRITE THE DATA IN A SOCKET
+        // SEND
+        sprintf(DataToSend, "V:%02d T:%02d T:%02d ", 99, 35, 50);
+        writeString(DataToSend);
+        do{
+            readString(DataReceived);
+        }while(DataReceived[0] != 'S' && DataReceived[1] != 'E');
+
+        // CLOSE THE SOCKET
+        // OK
+        sprintf(DataToSend, "AT+CIPCLOSE=%c\r\n", DataReceived[5]);
+        writeString(DataToSend);
+
+
+        _delay_ms(5000);
+    }
 }
