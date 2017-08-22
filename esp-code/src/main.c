@@ -111,6 +111,8 @@ int main(void)
 	UCSR0C = 0b00000110; //Habilita o modo assíncrono (UMSEL01/00 = 00), desabilita paridade (UPM01/00 = 00),
 						 //Seleciona um bit de stop (USBS0 = 0), seleciona 8 bits de dados (UCSZ1/0 = 11) e
 						 //sem polaridade (UCPOL0 = 0 - modo assíncrono).
+   writeString("ATE0\r\n");
+   wait_sec(3);
 
     //==============================================================================
     // ESP RESET
@@ -120,14 +122,15 @@ int main(void)
     //==============================================================================
     // ESP MODE: softAP + station mode
     writeString("AT+CWMODE_CUR=3\r\n");
-    do{
-        readString(DataReceived);
-    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+    wait_sec(3);
+    // do{
+    //     readString(DataReceived);
+    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 
     //==============================================================================
     // ESP MODE: softAP + station mode
     // CONNECT TO A NETWORK
-    writeString("AT+CWJAP_CUR=\"Brega Familiar\",\"boapergunta\"\r\n");
+    writeString("AT+CWJAP_CUR=\"OnePlus3\",\"12345678\"\r\n");
     do{
         readString(DataReceived);
     }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
@@ -137,8 +140,6 @@ int main(void)
     do{
         readString(DataReceived);
     }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-
-
 
     //==============================================================================
     // GET IP
