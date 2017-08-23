@@ -130,26 +130,26 @@ int main(void)
     //==============================================================================
     // ESP MODE: softAP + station mode
     writeString("AT+CWMODE_CUR=3\r\n");
-	_delay_ms(3000);
-    // do{
-    //     readString(DataReceived);
-    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+	// _delay_ms(3000);
+    do{
+        readString(DataReceived);
+    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 
     //==============================================================================
     // ESP MODE: softAP + station mode
     // CONNECT TO A NETWORK
     writeString("AT+CWJAP_CUR=\"JG\",\"cabritinhos\"\r\n");
-	_delay_ms(10000);
-	// do{
-    //     readString(DataReceived);
-    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+	// _delay_ms(10000);
+	do{
+        readString(DataReceived);
+    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 
     // CREATE A NETWORK
     writeString("AT+CWSAP_CUR=\"ESP8266\",\"1234567890\",5,3\r\n");
-	_delay_ms(3000);
-	// do{
-    //     readString(DataReceived);
-    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+	// _delay_ms(3000);
+	do{
+        readString(DataReceived);
+    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 	//
     // //==============================================================================
     // // GET IP
@@ -161,10 +161,10 @@ int main(void)
     //==============================================================================
     // ENABLE MUTIPLE CONNECTIONS
     writeString("AT+CIPMUX=1\r\n");
-	_delay_ms(4000);
-    // do{
-    //     readString(DataReceived);
-    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+	// _delay_ms(4000);
+    do{
+        readString(DataReceived);
+    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 	//
     // //==============================================================================
     // // SET THE SERVER TIMEOUT
@@ -188,29 +188,29 @@ int main(void)
         ConnectionPort = 0;
         DataLength = 2;
         writeString("AT+CIPSTART=0,\"TCP\",\"192.168.0.105\",8080\r\n");
-		_delay_ms(5000);
-        // do{
-        //     readString(DataReceived);
-        // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-        //readString(DataReceived);
+		// _delay_ms(5000);
+        do{
+            readString(DataReceived);
+        }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+        readString(DataReceived);
 
         // SEND BACK THE DATA
         // OK
         sprintf(DataToSend, "AT+CIPSEND=0,%d\r\n", strlen(GetRequest));
         writeString(DataToSend);
-		_delay_ms(3000);
-        // do{
-        //     readString(DataReceived);
-        // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+		// _delay_ms(3000);
+        do{
+            readString(DataReceived);
+        }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 
         // WRITE THE DATA IN A SOCKET
         // SEND
         sprintf(DataToSend, "%s", GetRequest);
         writeString(DataToSend);
-		_delay_ms(7000);
-	    // do{
-        //     readString(DataReceived);
-        // }while(DataReceived[0] != 'S' && DataReceived[1] != 'E');
+		// _delay_ms(7000);
+	    do{
+            readString(DataReceived);
+        }while(DataReceived[0] != 'S' && DataReceived[1] != 'E');
 
         // CLOSE THE SOCKET
         // OK
