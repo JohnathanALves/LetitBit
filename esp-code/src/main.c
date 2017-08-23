@@ -93,6 +93,7 @@ int main(void)
     char ConnectionPort, DataLength;
     char DataToSend[40];
     char DataReceived[50];
+	char GetRequest[] = "GET /send\r\n\r\n";
 
     //==============================================================================
     // CONFIG SERIAL PORT
@@ -111,18 +112,25 @@ int main(void)
 	UCSR0C = 0b00000110; //Habilita o modo assíncrono (UMSEL01/00 = 00), desabilita paridade (UPM01/00 = 00),
 						 //Seleciona um bit de stop (USBS0 = 0), seleciona 8 bits de dados (UCSZ1/0 = 11) e
 						 //sem polaridade (UCPOL0 = 0 - modo assíncrono).
-   writeString("ATE0\r\n");
-   wait_sec(3);
+
 
     //==============================================================================
     // ESP RESET
     writeString("AT+RST\r\n");
-    wait_sec(3);
+    wait_sec(7);
+
+	//==============================================================================
+    // ESP DISABLE ECHO
+	// OK
+	// writeString("ATE0\r\n");
+	// do{
+	// 	readString(DataReceived);
+	// }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 
     //==============================================================================
     // ESP MODE: softAP + station mode
     writeString("AT+CWMODE_CUR=3\r\n");
-    wait_sec(3);
+	_delay_ms(3000);
     // do{
     //     readString(DataReceived);
     // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
@@ -130,79 +138,84 @@ int main(void)
     //==============================================================================
     // ESP MODE: softAP + station mode
     // CONNECT TO A NETWORK
-    writeString("AT+CWJAP_CUR=\"OnePlus3\",\"12345678\"\r\n");
-    do{
-        readString(DataReceived);
-    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+    writeString("AT+CWJAP_CUR=\"JG\",\"cabritinhos\"\r\n");
+	_delay_ms(10000);
+	// do{
+    //     readString(DataReceived);
+    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 
     // CREATE A NETWORK
     writeString("AT+CWSAP_CUR=\"ESP8266\",\"1234567890\",5,3\r\n");
-    do{
-        readString(DataReceived);
-    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-
-    //==============================================================================
-    // GET IP
-    writeString("AT+CIFSR\r\n");
-    do{
-        readString(DataReceived);
-    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-
+	_delay_ms(3000);
+	// do{
+    //     readString(DataReceived);
+    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+	//
+    // //==============================================================================
+    // // GET IP
+    // writeString("AT+CIFSR\r\n");
+    // do{
+    //     readString(DataReceived);
+    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+	//
     //==============================================================================
     // ENABLE MUTIPLE CONNECTIONS
     writeString("AT+CIPMUX=1\r\n");
-    do{
-        readString(DataReceived);
-    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-
-    //==============================================================================
-    // SET THE SERVER TIMEOUT
-    /*writeString("AT+CIPSTO=10\r\n");
-    do{
-        readString(DataReceived);
-    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K'); */
-
-    //==============================================================================
-    // ENABLE WEB SERVER
-    writeString("AT+CIPSERVER=1\r\n");
-    do{
-        readString(DataReceived);
-    }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
-
-
+	_delay_ms(4000);
+    // do{
+    //     readString(DataReceived);
+    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+	//
+    // //==============================================================================
+    // // SET THE SERVER TIMEOUT
+    // /*writeString("AT+CIPSTO=10\r\n");
+    // do{
+    //     readString(DataReceived);
+    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K'); */
+	//
+    // //==============================================================================
+    // // ENABLE WEB SERVER
+    // writeString("AT+CIPSERVER=1\r\n");
+    // do{
+    //     readString(DataReceived);
+    // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+	//
+	//
     //==============================================================================
     // SYSTEM LOOP
     while(1)
     {
         ConnectionPort = 0;
         DataLength = 2;
-        writeString("AT+CIPSTART=\"TCP\",\"192.168.4.1\",8080 \r\n");
-        do{
-            readString(DataReceived);
-        }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+        writeString("AT+CIPSTART=0,\"TCP\",\"192.168.0.105\",8080\r\n");
+		_delay_ms(5000);
+        // do{
+        //     readString(DataReceived);
+        // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
         //readString(DataReceived);
 
         // SEND BACK THE DATA
         // OK
-        sprintf(DataToSend, "AT+CIPSEND=%c,%d\r\n", 0, 15);
+        sprintf(DataToSend, "AT+CIPSEND=0,%d\r\n", strlen(GetRequest));
         writeString(DataToSend);
-        do{
-            readString(DataReceived);
-        }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+		_delay_ms(3000);
+        // do{
+        //     readString(DataReceived);
+        // }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 
         // WRITE THE DATA IN A SOCKET
         // SEND
-        sprintf(DataToSend, "V:%02d T:%02d T:%02d ", 99, 35, 50);
+        sprintf(DataToSend, "%s", GetRequest);
         writeString(DataToSend);
-        do{
-            readString(DataReceived);
-        }while(DataReceived[0] != 'S' && DataReceived[1] != 'E');
+		_delay_ms(7000);
+	    // do{
+        //     readString(DataReceived);
+        // }while(DataReceived[0] != 'S' && DataReceived[1] != 'E');
 
         // CLOSE THE SOCKET
         // OK
-        sprintf(DataToSend, "AT+CIPCLOSE=%c\r\n", DataReceived[5]);
+        sprintf(DataToSend, "AT+CIPCLOSE=0\r\n");
         writeString(DataToSend);
-
 
         _delay_ms(5000);
     }
