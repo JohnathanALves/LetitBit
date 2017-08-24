@@ -119,7 +119,7 @@ int main(void)
     //==============================================================================
     // ESP RESET
     writeString("AT+RST\r\n");
-    wait_sec(7);
+    wait_sec(3);
 
 	//==============================================================================
     // ESP DISABLE ECHO
@@ -135,7 +135,7 @@ int main(void)
     //==============================================================================
     // ESP MODE: softAP + station mode
     // CONNECT TO A NETWORK
-    writeString("AT+CWJAP_CUR=\"JG\",\"cabritinhos\"\r\n");
+    writeString("AT+CWJAP_CUR=\"OnePlus3\",\"12345678\"\r\n");
 	_delay_ms(10000);
 
     // CREATE A NETWORK
