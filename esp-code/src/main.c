@@ -93,7 +93,9 @@ int main(void)
     char ConnectionPort, DataLength;
     char DataToSend[40];
     char DataReceived[50];
-	char GetRequest[] = "GET /send\r\n\r\n";
+	char GetRequest[] = "GET / HTTP/1.1\r\n"
+						"Host: letitbit.herokuapp.com\r\n"
+						"Cache-Control: no-cache\r\n\r\n";
 
     //==============================================================================
     // CONFIG SERIAL PORT
@@ -124,7 +126,7 @@ int main(void)
 	// OK
 	// writeString("ATE0\r\n");
 	// _delay_ms(3000);
-	
+
     //==============================================================================
     // ESP MODE: softAP + station mode
     writeString("AT+CWMODE_CUR=3\r\n");
@@ -150,7 +152,7 @@ int main(void)
     {
         ConnectionPort = 0;
         DataLength = 2;
-        writeString("AT+CIPSTART=0,\"TCP\",\"192.168.0.105\",8080\r\n");
+		writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
 		_delay_ms(5000);
 
         // SEND BACK THE DATA
