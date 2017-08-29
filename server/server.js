@@ -6,7 +6,7 @@ const port = 8080;
 const server = http.createServer(app)
 
 // chamada de uma base de dados
-var redis = require('./database')
+var redis = require('./database.js');
 
 listener = server.listen((process.env.PORT || port), (err) => {
   if (err) {
