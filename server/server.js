@@ -1,19 +1,18 @@
+var http = require("http");
 const express = require('express');
-const jsonFile = require('jsonFile');
-var bodyParser = require('body-parser');
 const app = express();
-const port = 3000;
+const port = 8080;
 
+const server = http.createServer(app)
 
-app.listen(port, function () {
-  console.log('to ouvindo! hahahah!');
-});
+listener = server.listen((process.env.PORT || port), (err) => {
+  if (err) {
+    return console.log('something bad happened', err)
+  }
+
+  console.log(`server is listening on ${listener.address().port}`)
+})
 
 app.get('/', function(req, res){
   res.send('aiaiaiaiai');
-});
-
-app.post('/data', function(req, res){
-  //recebe os dados vindos do esp
-
 });
