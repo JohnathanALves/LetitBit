@@ -122,10 +122,10 @@ int main(void)
 	//==============================================================================
     // ESP DISABLE ECHO
 	// OK
-	// writeString("ATE0\r\n");
-	// do{
-	// 	readString(DataReceived);
-	// }while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
+	writeString("ATE0\r\n");
+	do{
+		readString(DataReceived);
+	}while(DataReceived[0] != 'O' && DataReceived[1] != 'K');
 
     //==============================================================================
     // ESP MODE: softAP + station mode
