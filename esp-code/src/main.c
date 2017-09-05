@@ -92,18 +92,12 @@ void post_request(char *req, int params[6])
 {
 	sprintf(
 		req,
-		"POST / HTTP/1.1\r\n"
+		"POST /send HTTP/1.1\r\n"
 		"Host: letitbit.herokuapp.com\r\n"
+		"Content-Type: application/json\r\n"
 		"Cache-Control: no-cache\r\n"
-		"Content-Type: application/json\r\n\r\n"
-		"{\r\n"
-			"\"x\": %d\r\n"
-			"\"y\": %d\r\n"
-			"\"z\": %d\r\n"
-			"\"roll\": %d\r\n"
-			"\"pitch\": %d\r\n"
-			"\"yall\": %d\r\n"
-		"}\r\n",
+		"{\"x\":%d,\"y\":%d,\"z\":%d,\"roll\":%d,\"pitch\":%d,\"yall\":%d}\r\n"
+		,
 		params[0],
 		params[1],
 		params[2],
@@ -160,7 +154,7 @@ int main(void)
     //==============================================================================
     // ESP MODE: softAP + station mode
     // CONNECT TO A NETWORK
-    writeString("AT+CWJAP_CUR=\"cangaco\",\"iff3R43Q\"\r\n");
+    writeString("AT+CWJAP_CUR=\"OnePlus3\",\"12345678\"\r\n");
 	_delay_ms(15000);
 
     // CREATE A NETWORK
@@ -175,22 +169,27 @@ int main(void)
     // SYSTEM LOOP
     while(1)
     {
-        ConnectionPort = 0;
+		char PostRequest[500];
+		int params[] = {1,2,3,4,5,6};
+		ConnectionPort = 0;
         DataLength = 2;
+
+		post_request(PostRequest, params);
+
 		writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
 		_delay_ms(5000);
 
         // SEND BACK THE DATA
         // OK
-        sprintf(DataToSend, "AT+CIPSEND=0,%d\r\n", strlen(GetRequest));
+        sprintf(DataToSend, "AT+CIPSEND=0,%d\r\n", strlen(PostRequest));
         writeString(DataToSend);
 		_delay_ms(3000);
 
         // WRITE THE DATA IN A SOCKET
         // SEND
-        sprintf(DataToSend, "%s", GetRequest);
+        sprintf(DataToSend, "%s", PostRequest);
         writeString(DataToSend);
-		_delay_ms(7000);
+		_delay_ms(14000);
 
         // CLOSE THE SOCKET
         // OK
