@@ -13,6 +13,9 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#define USART_BAUDRATE 19200
+#define UBBR_VALUE (((F_CPU / (USART_BAUDRATE * 16UL))) - 1)
+
 //==============================================================================
 // ADVANCED SETTINGS
 #define HOST            "192.168.1.105" // IP FOR CONNECTION
@@ -93,10 +96,10 @@ void post_request(char *req, int params[6])
 	sprintf(
 		req,
 		"POST /send HTTP/1.1\r\n"
-		"Host: letitbit.herokuapp.com\r\n"
-		"Content-Type: application/json\r\n"
-		"Cache-Control: no-cache\r\n"
-		"{\"x\":%d,\"y\":%d,\"z\":%d,\"roll\":%d,\"pitch\":%d,\"yall\":%d}\r\n"
+		"Host: 10.42.0.21:8080\r\n"
+		"Content-Type: application/json\r\n\r\n"
+		// "Cache-Control: no-cache\r\n\rn"
+		"{\"x\":1}"
 		,
 		params[0],
 		params[1],
@@ -112,9 +115,9 @@ int main(void)
     char ConnectionPort, DataLength;
     char DataToSend[40];
     char DataReceived[50];
-	char GetRequest[] = "GET / HTTP/1.1\r\n"
-						"Host: letitbit.herokuapp.com\r\n"
-						"Cache-Control: no-cache\r\n\r\n";
+	// char GetRequest[] = "GET / HTTP/1.1\r\n"
+	// 					"Host: 10.42.0.21:8080\r\n\r\n";
+						// "Cache-Control: no-cache\r\n\r\n";
 
     //==============================================================================
     // CONFIG SERIAL PORT
@@ -123,6 +126,9 @@ int main(void)
 	//Para um baud rate = 115200, temos UBRR0 = 8d = 00000000 00001000
 	UBRR0H = 0b00000000;//115200 bits/s.
 	UBRR0L = 0b00001000;
+
+	// UBRR0H = (uint8_t)(UBBR_VALUE>>8);
+	// UBRR0L = (uint8_t)UBBR_VALUE;
 
 	UCSR0A = 0b01000000; //TXC0 = 1 (zera esse flag), U2X0 = 0 (velocidade normal),
 						 //MPCM0 = 0 (desabilita modo multiprocessador).
@@ -143,8 +149,8 @@ int main(void)
 	//==============================================================================
     // ESP DISABLE ECHO
 	// OK
-	// writeString("ATE0\r\n");
-	// _delay_ms(3000);
+	 writeString("ATE1\r\n");
+	 _delay_ms(3000);
 
     //==============================================================================
     // ESP MODE: softAP + station mode
@@ -154,30 +160,38 @@ int main(void)
     //==============================================================================
     // ESP MODE: softAP + station mode
     // CONNECT TO A NETWORK
-    writeString("AT+CWJAP_CUR=\"OnePlus3\",\"12345678\"\r\n");
-	_delay_ms(15000);
+    writeString("AT+CWJAP_CUR=\"cangaco\",\"iff3R4Q3\"\r\n");
+	_delay_ms(10000);
 
     // CREATE A NETWORK
-    writeString("AT+CWSAP_CUR=\"ESP8266\",\"1234567890\",5,3\r\n");
-	_delay_ms(3000);
+    // writeString("AT+CWSAP_CUR=\"ESP8266\",\"12345678\",5,3\r\n");
+	// _delay_ms(6000);
 
     //==============================================================================
     // ENABLE MUTIPLE CONNECTIONS
     writeString("AT+CIPMUX=1\r\n");
-	_delay_ms(4000);
+	_delay_ms(6000);
+
+	//==============================================================================
+   // // ENABLE WEB SERVER
+    // writeString("AT+CIPSERVER=1\r\n");
+	// _delay_ms(6000);
 
     // SYSTEM LOOP
     while(1)
     {
 		char PostRequest[500];
 		int params[] = {1,2,3,4,5,6};
-		ConnectionPort = 0;
-        DataLength = 2;
+		// ConnectionPort = 0;
+        // DataLength = 2;
 
 		post_request(PostRequest, params);
 
-		writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
+		writeString("AT+CIPSTART=0,\"TCP\",\"10.42.0.21\",8080\r\n");
 		_delay_ms(5000);
+
+		// printf("%s\n", PostRequest);
+		// _delay_ms(3000);
 
         // SEND BACK THE DATA
         // OK
