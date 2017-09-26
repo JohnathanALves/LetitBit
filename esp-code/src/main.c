@@ -12,19 +12,10 @@
 #include <string.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include "mpu6050.h"
 
 #define USART_BAUDRATE 19200
 #define UBBR_VALUE (((F_CPU / (USART_BAUDRATE * 16UL))) - 1)
-
-//==============================================================================
-// ADVANCED SETTINGS
-#define HOST            "192.168.1.105" // IP FOR CONNECTION
-#define PORT            "1234"          // PORT FOR CONNECTION
-#define SSID            "Marques"       // NETWORK SSID
-#define PASSWORD        "M12345678"     // NETWORK PASSWORD
-#define MAX_DATA        5               // MAX NUMBER OF 'UPLOAD'
-#define MAX_TRY         3               // MAX NUMBER OF FAILS CONNECTIONS
-
 
 //==============================================================================
 //	Function: getByte
@@ -115,6 +106,7 @@ int main(void)
     char ConnectionPort, DataLength;
     char DataToSend[40];
     char DataReceived[50];
+
 	// char GetRequest[] = "GET / HTTP/1.1\r\n"
 	// 					"Host: 10.42.0.21:8080\r\n\r\n";
 						// "Cache-Control: no-cache\r\n\r\n";
