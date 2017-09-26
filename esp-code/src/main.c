@@ -96,7 +96,7 @@ void post_request(char *req, int params[6])
 	sprintf(
 		req,
 		"POST /send HTTP/1.1\r\n"
-		"Host: 10.42.0.21:8080\r\n"
+		"Host: letitbit.herokuapp.com:80\r\n"
 		"Content-Type: application/json\r\n\r\n"
 		// "Cache-Control: no-cache\r\n\rn"
 		"{\"x\":1}"
@@ -160,7 +160,7 @@ int main(void)
     //==============================================================================
     // ESP MODE: softAP + station mode
     // CONNECT TO A NETWORK
-    writeString("AT+CWJAP_CUR=\"cangaco\",\"iff3R4Q3\"\r\n");
+    writeString("AT+CWJAP_CUR=\"OnePlus3\",\"12345678\"\r\n");
 	_delay_ms(10000);
 
     // CREATE A NETWORK
@@ -187,7 +187,7 @@ int main(void)
 
 		post_request(PostRequest, params);
 
-		writeString("AT+CIPSTART=0,\"TCP\",\"10.42.0.21\",8080\r\n");
+		writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
 		_delay_ms(5000);
 
 		// printf("%s\n", PostRequest);
