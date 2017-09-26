@@ -7,8 +7,10 @@
  * TXD = RXD (pino 2) e RXD = TXD (pino 3) e GND = GND...o ATMEGA328P alimentado.
  */
 
-#define F_CPU 16000000UL
-#include <stdio.h>
+#ifndef F_CPU
+ #define F_CPU 16000000UL
+#endif
+
 #include <string.h>
 #include <avr/io.h>
 #include <util/delay.h>
@@ -82,7 +84,7 @@ void wait_sec(int n)
     }
 }
 
-void post_request(char *req, int params[6])
+void post_request(char *req, long int params[7])
 {
 	sprintf(
 		req,
@@ -90,26 +92,32 @@ void post_request(char *req, int params[6])
 		"Host: letitbit.herokuapp.com:80\r\n"
 		"Content-Type: application/json\r\n\r\n"
 		// "Cache-Control: no-cache\r\n\rn"
-		"{\"x\":1}"
+		"{\"accelx\":%ld}"
+		// " \"accely\":\"%ld\","
+		// " \"accelz\":\"%ld\","
+		// " \"gyrox\":\"%ld\","
+		// " \"gyroy\":\"%ld\","
+		// " \"gyroz\":\"%ld\","
+		// " \"temp\": \"%ld\"}"
 		,
-		params[0],
-		params[1],
-		params[2],
-		params[3],
-		params[4],
-		params[5]
+		params[0]
+		// params[1],
+		// params[2],
+		// params[3],
+		// params[4],
+		// params[5],
+		// params[6]
 	);
 }
 
 int main(void)
 {
-    char ConnectionPort, DataLength;
-    char DataToSend[40];
-    char DataReceived[50];
+	char PostRequest[500];
+	long int params[7];
+    char DataToSend[300];
+	long int AccelX, AccelY, AccelZ, Temperatura, gyroX,gyroY,gyroZ;
 
-	// char GetRequest[] = "GET / HTTP/1.1\r\n"
-	// 					"Host: 10.42.0.21:8080\r\n\r\n";
-						// "Cache-Control: no-cache\r\n\r\n";
+    // char DataReceived[50];
 
     //==============================================================================
     // CONFIG SERIAL PORT
@@ -133,6 +141,13 @@ int main(void)
 						 //sem polaridade (UCPOL0 = 0 - modo assíncrono).
 
 
+	//==============================================================================
+    // MPU specific code
+
+	Twi_Init();
+	MPU6050_Init();
+	_delay_ms(5000);
+
     //==============================================================================
     // ESP RESET
     writeString("AT+RST\r\n");
@@ -155,28 +170,46 @@ int main(void)
     writeString("AT+CWJAP_CUR=\"OnePlus3\",\"12345678\"\r\n");
 	_delay_ms(10000);
 
-    // CREATE A NETWORK
-    // writeString("AT+CWSAP_CUR=\"ESP8266\",\"12345678\",5,3\r\n");
-	// _delay_ms(6000);
-
     //==============================================================================
     // ENABLE MUTIPLE CONNECTIONS
     writeString("AT+CIPMUX=1\r\n");
 	_delay_ms(6000);
 
-	//==============================================================================
-   // // ENABLE WEB SERVER
-    // writeString("AT+CIPSERVER=1\r\n");
-	// _delay_ms(6000);
-
     // SYSTEM LOOP
     while(1)
     {
-		char PostRequest[500];
-		int params[] = {1,2,3,4,5,6};
-		// ConnectionPort = 0;
-        // DataLength = 2;
+		// MPU interaction specific code
+		Twi_Start();
+	    Twi_Write( MPU6050_ADDRESS );
+	    Twi_Write( MPU6050_RA_ACCEL_XOUT_H );
 
+	    _delay_us(20);
+
+	    Twi_Start();
+	    Twi_Write( MPU6050_ADDRESS | 1 );
+
+	    AccelX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    AccelY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    AccelZ = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    Temperatura = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    gyroX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    gyroY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    gyroZ = ( TWI_ReadACK() << 8 ) | TWIReadNACK();
+
+	    Twi_Stop();
+
+	    Temperatura = Temperatura + 12421;
+	    Temperatura = Temperatura / 340;
+
+		params[0] = AccelX;
+		params[1] = AccelY;
+		params[2] = AccelZ;
+		params[3] = gyroX;
+		params[4] = gyroY;
+		params[5] = gyroZ;
+		params[6] = Temperatura;
+
+		// ESP send data code
 		post_request(PostRequest, params);
 
 		writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
@@ -189,7 +222,7 @@ int main(void)
         // OK
         sprintf(DataToSend, "AT+CIPSEND=0,%d\r\n", strlen(PostRequest));
         writeString(DataToSend);
-		_delay_ms(3000);
+		_delay_ms(5000);
 
         // WRITE THE DATA IN A SOCKET
         // SEND

@@ -3,6 +3,10 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#ifndef F_CPU
+ #define F_CPU 16000000UL
+#endif
+
 #define MPU6050_ADDRESS   0xD0
 #define MPU6050_RA_XG_OFFS_TC       0x00
 #define MPU6050_RA_YG_OFFS_TC       0x01

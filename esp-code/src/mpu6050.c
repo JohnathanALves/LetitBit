@@ -7,9 +7,6 @@
 
 //#define __AVR_ATmega328__
 
-#ifndef F_CPU
- #define F_CPU 16000000UL
-#endif
 
 #include "mpu6050.h"
 
@@ -201,61 +198,3 @@ void MPU6050_Init()
   Twi_Stop();
 
 }
-
-//============================================================================
-//
-// int main(void)
-// {
-//   long int status,i;
-//   long int AccelX,AccelY,AccelZ, Temperatura, gyroX,gyroY,gyroZ;
-//   char Data[30];
-//
-//
-//   USART_Init();
-//   //USART_writeString("Started!\r\n");
-//   //USART_writeString("USART CHECK!\r\n");
-//   Twi_Init();
-//   //USART_writeString("I2C CHECK!\r\n");
-// 	MPU6050_Init();
-//   //USART_writeString("MPU CHECK!\r\n");
-//
-//   //USART_writeString("READING!\r\n");
-//   _delay_ms(5000);
-//   //============================================================================
-//   while (1)
-//   {
-//     Twi_Start();
-//     Twi_Write( MPU6050_ADDRESS );
-//     Twi_Write( MPU6050_RA_ACCEL_XOUT_H );
-//     _delay_us(20);
-//     Twi_Start();
-//     Twi_Write( MPU6050_ADDRESS | 1 );
-//     AccelX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-//     AccelY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-//     AccelZ = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-//     Temperatura = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-//     gyroX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-//     gyroY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-//     gyroZ = ( TWI_ReadACK() << 8 ) | TWIReadNACK();
-//     Twi_Stop();
-//
-//     Temperatura = Temperatura + 12421;
-//     Temperatura = Temperatura / 340;
-//
-//     gyroX += 697;
-//     //gyroY += 655;
-//     //gyroZ += 75;
-//
-//     //USART_sendByte(0xff);
-//
-//     sprintf(Data, "%06ld,%06ld,%06ld,", AccelX, AccelY, AccelZ);
-//     USART_writeString(Data);
-//     sprintf(Data, "%06ld,%06ld,%06ld,", gyroX, gyroY, gyroZ);
-//     USART_writeString(Data);
-//     sprintf(Data, "%06ld,\n", Temperatura);
-//     USART_writeString(Data);
-//
-//     _delay_ms(1);
-//
-//   }
-// }
