@@ -86,27 +86,36 @@ void wait_sec(int n)
 
 void post_request(char *req, long int params[7])
 {
+	char json[200];
+
+	sprintf(json,
+		"{\"accelx\":\"%ld\","
+		" \"accely\":\"%ld\","
+		" \"accelz\":\"%ld\","
+		" \"gyrox\":\"%ld\","
+		" \"gyroy\":\"%ld\","
+		" \"gyroz\":\"%ld\","
+		" \"temp\": \"%ld\"}",
+		params[0],
+		params[1],
+		params[2],
+		params[3],
+		params[4],
+		params[5],
+		params[6]
+	);
+
 	sprintf(
 		req,
 		"POST /send HTTP/1.1\r\n"
 		"Host: letitbit.herokuapp.com:80\r\n"
+		//"Host: letitbit.herokuapp.com:80\r\n"
+		"Connection: close\r\n"
+		"Content-Length: %d\r\n"
 		"Content-Type: application/json\r\n\r\n"
-		// "Cache-Control: no-cache\r\n\rn"
-		"{\"accelx\":%ld}"
-		// " \"accely\":\"%ld\","
-		// " \"accelz\":\"%ld\","
-		// " \"gyrox\":\"%ld\","
-		// " \"gyroy\":\"%ld\","
-		// " \"gyroz\":\"%ld\","
-		// " \"temp\": \"%ld\"}"
-		,
-		params[0]
-		// params[1],
-		// params[2],
-		// params[3],
-		// params[4],
-		// params[5],
-		// params[6]
+		"%s",
+		strlen(json),
+		json
 	);
 }
 
@@ -144,9 +153,9 @@ int main(void)
 	//==============================================================================
     // MPU specific code
 
-	Twi_Init();
-	MPU6050_Init();
-	_delay_ms(5000);
+	// Twi_Init();
+	// MPU6050_Init();
+	// _delay_ms(5000);
 
     //==============================================================================
     // ESP RESET
@@ -179,40 +188,48 @@ int main(void)
     while(1)
     {
 		// MPU interaction specific code
-		Twi_Start();
-	    Twi_Write( MPU6050_ADDRESS );
-	    Twi_Write( MPU6050_RA_ACCEL_XOUT_H );
+		// Twi_Start();
+	    // Twi_Write( MPU6050_ADDRESS );
+	    // Twi_Write( MPU6050_RA_ACCEL_XOUT_H );
+		//
+	    // _delay_us(20);
+		//
+	    // Twi_Start();
+	    // Twi_Write( MPU6050_ADDRESS | 1 );
+		//
+	    // AccelX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    // AccelY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    // AccelZ = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    // Temperatura = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    // gyroX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    // gyroY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    // gyroZ = ( TWI_ReadACK() << 8 ) | TWIReadNACK();
+		//
+	    // Twi_Stop();
+		//
+	    // Temperatura = Temperatura + 12421;
+	    // Temperatura = Temperatura / 340;
 
-	    _delay_us(20);
+		// params[0] = AccelX;
+		// params[1] = AccelY;
+		// params[2] = AccelZ;
+		// params[3] = gyroX;
+		// params[4] = gyroY;
+		// params[5] = gyroZ;
+		// params[6] = Temperatura;
 
-	    Twi_Start();
-	    Twi_Write( MPU6050_ADDRESS | 1 );
-
-	    AccelX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    AccelY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    AccelZ = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    Temperatura = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    gyroX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    gyroY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    gyroZ = ( TWI_ReadACK() << 8 ) | TWIReadNACK();
-
-	    Twi_Stop();
-
-	    Temperatura = Temperatura + 12421;
-	    Temperatura = Temperatura / 340;
-
-		params[0] = AccelX;
-		params[1] = AccelY;
-		params[2] = AccelZ;
-		params[3] = gyroX;
-		params[4] = gyroY;
-		params[5] = gyroZ;
-		params[6] = Temperatura;
+		params[0] = 1;
+		params[1] = 2;
+		params[2] = 3;
+		params[3] = 4;
+		params[4] = 5;
+		params[5] = 6;
+		params[6] = 7;
 
 		// ESP send data code
 		post_request(PostRequest, params);
-
 		writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
+		//writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
 		_delay_ms(5000);
 
 		// printf("%s\n", PostRequest);
