@@ -153,8 +153,8 @@ int main(void)
 	//==============================================================================
     // MPU specific code
 
-	// Twi_Init();
-	// MPU6050_Init();
+	Twi_Init();
+	MPU6050_Init();
 	// _delay_ms(5000);
 
     //==============================================================================
@@ -188,49 +188,41 @@ int main(void)
     while(1)
     {
 		// MPU interaction specific code
-		// Twi_Start();
-	    // Twi_Write( MPU6050_ADDRESS );
-	    // Twi_Write( MPU6050_RA_ACCEL_XOUT_H );
-		//
-	    // _delay_us(20);
-		//
-	    // Twi_Start();
-	    // Twi_Write( MPU6050_ADDRESS | 1 );
-		//
-	    // AccelX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    // AccelY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    // AccelZ = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    // Temperatura = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    // gyroX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    // gyroY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
-	    // gyroZ = ( TWI_ReadACK() << 8 ) | TWIReadNACK();
-		//
-	    // Twi_Stop();
-		//
-	    // Temperatura = Temperatura + 12421;
-	    // Temperatura = Temperatura / 340;
+		Twi_Start();
+	    Twi_Write( MPU6050_ADDRESS );
+	    Twi_Write( MPU6050_RA_ACCEL_XOUT_H );
 
-		// params[0] = AccelX;
-		// params[1] = AccelY;
-		// params[2] = AccelZ;
-		// params[3] = gyroX;
-		// params[4] = gyroY;
-		// params[5] = gyroZ;
-		// params[6] = Temperatura;
+	    _delay_us(20);
 
-		params[0] = 1;
-		params[1] = 2;
-		params[2] = 3;
-		params[3] = 4;
-		params[4] = 5;
-		params[5] = 6;
-		params[6] = 7;
+	    Twi_Start();
+	    Twi_Write( MPU6050_ADDRESS | 1 );
+
+	    AccelX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    AccelY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    AccelZ = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    Temperatura = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    gyroX = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    gyroY = ( TWI_ReadACK() << 8 ) | TWI_ReadACK();
+	    gyroZ = ( TWI_ReadACK() << 8 ) | TWIReadNACK();
+
+	    Twi_Stop();
+
+	    Temperatura = Temperatura + 12421;
+	    Temperatura = Temperatura / 340;
+
+		params[0] = AccelX;
+		params[1] = AccelY;
+		params[2] = AccelZ;
+		params[3] = gyroX;
+		params[4] = gyroY;
+		params[5] = gyroZ;
+		params[6] = Temperatura;
 
 		// ESP send data code
 		post_request(PostRequest, params);
 		writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
 		//writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
-		_delay_ms(5000);
+		_delay_ms(3000);
 
 		// printf("%s\n", PostRequest);
 		// _delay_ms(3000);
@@ -239,13 +231,13 @@ int main(void)
         // OK
         sprintf(DataToSend, "AT+CIPSEND=0,%d\r\n", strlen(PostRequest));
         writeString(DataToSend);
-		_delay_ms(5000);
+		_delay_ms(2000);
 
         // WRITE THE DATA IN A SOCKET
         // SEND
         sprintf(DataToSend, "%s", PostRequest);
         writeString(DataToSend);
-		_delay_ms(14000);
+		_delay_ms(3000);
 
         // CLOSE THE SOCKET
         // OK
