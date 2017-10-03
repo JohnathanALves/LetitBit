@@ -119,14 +119,38 @@ void post_request(char *req, long int params[7])
 	);
 }
 
-int main(void)
+void sendData(long int params[7])
 {
 	char PostRequest[500];
-	long int params[7];
     char DataToSend[300];
-	long int AccelX, AccelY, AccelZ, Temperatura, gyroX,gyroY,gyroZ;
 
-    // char DataReceived[50];
+	// ESP send data code
+	post_request(PostRequest, params);
+	writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
+	_delay_ms(3000);
+
+	// SEND BACK THE DATA
+	// OK
+	sprintf(DataToSend, "AT+CIPSEND=0,%d\r\n", strlen(PostRequest));
+	writeString(DataToSend);
+	_delay_ms(2000);
+
+	// WRITE THE DATA IN A SOCKET
+	// SEND
+	sprintf(DataToSend, "%s", PostRequest);
+	writeString(DataToSend);
+	_delay_ms(3000);
+
+	// CLOSE THE SOCKET
+	// OK
+	sprintf(DataToSend, "AT+CIPCLOSE=0\r\n");
+	writeString(DataToSend);
+}
+
+int main(void)
+{
+	long int params[7];
+	long int AccelX, AccelY, AccelZ, Temperatura, gyroX,gyroY,gyroZ;
 
     //==============================================================================
     // CONFIG SERIAL PORT
@@ -135,9 +159,6 @@ int main(void)
 	//Para um baud rate = 115200, temos UBRR0 = 8d = 00000000 00001000
 	UBRR0H = 0b00000000;//115200 bits/s.
 	UBRR0L = 0b00001000;
-
-	// UBRR0H = (uint8_t)(UBBR_VALUE>>8);
-	// UBRR0L = (uint8_t)UBBR_VALUE;
 
 	UCSR0A = 0b01000000; //TXC0 = 1 (zera esse flag), U2X0 = 0 (velocidade normal),
 						 //MPCM0 = 0 (desabilita modo multiprocessador).
@@ -155,7 +176,6 @@ int main(void)
 
 	Twi_Init();
 	MPU6050_Init();
-	// _delay_ms(5000);
 
     //==============================================================================
     // ESP RESET
@@ -218,32 +238,7 @@ int main(void)
 		params[5] = gyroZ;
 		params[6] = Temperatura;
 
-		// ESP send data code
-		post_request(PostRequest, params);
-		writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
-		//writeString("AT+CIPSTART=0,\"TCP\",\"letitbit.herokuapp.com\",80\r\n");
-		_delay_ms(3000);
-
-		// printf("%s\n", PostRequest);
-		// _delay_ms(3000);
-
-        // SEND BACK THE DATA
-        // OK
-        sprintf(DataToSend, "AT+CIPSEND=0,%d\r\n", strlen(PostRequest));
-        writeString(DataToSend);
-		_delay_ms(2000);
-
-        // WRITE THE DATA IN A SOCKET
-        // SEND
-        sprintf(DataToSend, "%s", PostRequest);
-        writeString(DataToSend);
-		_delay_ms(3000);
-
-        // CLOSE THE SOCKET
-        // OK
-        sprintf(DataToSend, "AT+CIPCLOSE=0\r\n");
-        writeString(DataToSend);
-
+		sendData(params);
         _delay_ms(5000);
     }
 }
