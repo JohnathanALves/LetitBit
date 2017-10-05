@@ -149,8 +149,17 @@ void sendData(long int params[7])
 
 int main(void)
 {
+	int read_count = 0;
 	long int params[7];
-	long int AccelX, AccelY, AccelZ, Temperatura, gyroX,gyroY,gyroZ;
+	long int AccelX,
+		     AccelY,
+			 AccelZ,
+			 Temperatura,
+			 gyroX,
+			 gyroY,
+			 gyroZ;
+
+	memset(params, 0, sizeof params);
 
     //==============================================================================
     // CONFIG SERIAL PORT
@@ -202,7 +211,9 @@ int main(void)
     //==============================================================================
     // ENABLE MUTIPLE CONNECTIONS
     writeString("AT+CIPMUX=1\r\n");
-	_delay_ms(6000);
+	_delay_ms(3000);
+
+	read_count = 0;
 
     // SYSTEM LOOP
     while(1)
@@ -230,15 +241,23 @@ int main(void)
 	    Temperatura = Temperatura + 12421;
 	    Temperatura = Temperatura / 340;
 
-		params[0] = AccelX;
-		params[1] = AccelY;
-		params[2] = AccelZ;
-		params[3] = gyroX;
-		params[4] = gyroY;
-		params[5] = gyroZ;
-		params[6] = Temperatura;
+		params[0] += AccelX;
+		params[1] += AccelY;
+		params[2] += AccelZ;
+		params[3] += gyroX;
+		params[4] += gyroY;
+		params[5] += gyroZ;
+		params[6] += Temperatura;
 
-		sendData(params);
-        _delay_ms(5000);
+		read_count++;
+
+		if (read_count >= 10) {
+			sendData(params);
+
+			read_count = 0;
+			memset(params, 0, sizeof params);
+		}
+
+		_delay_ms(1000);
     }
 }
